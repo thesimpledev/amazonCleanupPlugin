@@ -1,0 +1,52 @@
+body {
+  margin: 0;
+  min-width: 280px;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.master {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+main {
+  padding: 4px 12px 8px;
+}
+
+section h2 {
+  margin: 10px 0 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b6b6b;
+}
+
+section label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+footer {
+  padding: 8px 12px;
+  border-top: 1px solid #e0e0e0;
+  text-align: right;
+}

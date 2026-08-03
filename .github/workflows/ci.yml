@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [beta]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - uses: extractions/setup-just@v2
+      - name: Install TypeScript compiler
+        run: npm install -g typescript
+      - name: Install Go lint tools
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+          go install github.com/kisielk/errcheck@latest
+          go install github.com/mgechev/revive@latest
+      - name: Build and test
+        run: just test
+      - name: Keep the zips as build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-zips
+          path: dist/*.zip

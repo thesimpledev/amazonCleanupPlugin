@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Check whether the manifest version changed
+        id: version
+        run: |
+          changed=false
+          if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            if git diff HEAD^ HEAD -- extension/manifest.chrome.json | grep -q '"version"'; then
+              changed=true
+            fi
+          fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "manifest version changed: $changed"
+      - uses: actions/setup-node@v4
+        if: steps.version.outputs.changed == 'true'
+        with:
+          node-version: "24"
+      - uses: actions/setup-go@v5
+        if: steps.version.outputs.changed == 'true'
+        with:
+          go-version: "1.26"
+      - uses: extractions/setup-just@v2
+        if: steps.version.outputs.changed == 'true'
+      - name: Install TypeScript compiler
+        if: steps.version.outputs.changed == 'true'
+        run: npm install -g typescript
+      - name: Install Go lint tools
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+          go install github.com/kisielk/errcheck@latest
+          go install github.com/mgechev/revive@latest
+      - name: Build and test
+        if: steps.version.outputs.changed == 'true'
+        run: just test
+      - name: Publish to the Chrome Web Store
+        if: steps.version.outputs.changed == 'true'
+        env:
+          CWS_PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+        run: go run ./cmd/publish -store chrome -zip dist/chrome.zip
+      - name: Publish to Firefox AMO
+        if: steps.version.outputs.changed == 'true'
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          AMO_ADDON_ID="$(jq -r '.browser_specific_settings.gecko.id' extension/manifest.firefox.json)"
+          export AMO_ADDON_ID
+          go run ./cmd/publish -store firefox -zip dist/firefox.zip
