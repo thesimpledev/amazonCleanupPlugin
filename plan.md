@@ -58,8 +58,9 @@ what triggers the padding re-fix.
 ```
 LICENSE                       MIT
 justfile                      build | test | publish | clean
-tsconfig.json                 strict, ES2022, module "none", outDir build/
+tsconfig.json                 strict, ES2022, outDir build/
 go.mod                        module for cmd/publish
+.goaudit-capslock.json        goaudit capability baseline, committed
 cmd/publish/main.go           store upload tool, standard library only
 extension/
   manifest.chrome.json
@@ -80,7 +81,7 @@ src/
   popup/popup.ts
   options/options.ts
 test/
-  schedule.test.ts
+  schedule.test.js
   fixtures/
 .github/workflows/
   ci.yml
@@ -96,11 +97,13 @@ Chrome versions before 121 refuse to load a manifest containing
 
 `just build` runs `tsc`, assembles `dist/chrome/` and `dist/firefox/` (static
 files, compiled JS, the right manifest renamed to `manifest.json`), and zips
-both. Scripts are compiled as classic scripts (`module: "none"`) and loaded
-in dependency order: content scripts as an ordered file list in the manifest,
-popup and options as ordered `<script>` tags, background as an ordered
-`scripts` array on Firefox and `importScripts` inside the Chrome service
-worker.
+both. Source files use no import or export statements, so tsc treats them as
+classic scripts sharing one global scope regardless of the module setting
+(the config says `es2022` because TypeScript deprecated `module: "none"`).
+They load in dependency order: content scripts as an ordered file list in
+the manifest, popup and options as ordered `<script>` tags, background as an
+ordered `scripts` array on Firefox and `importScripts` inside the Chrome
+service worker.
 
 Permissions are `storage` and `alarms`. Chrome match patterns cannot wildcard
 a TLD, so `*://*.amazon.*/*` is invalid and every marketplace is listed
@@ -186,9 +189,10 @@ Two branches: `beta` is where work happens, `master` is what deploys. Merges
 only, never rebase. The repository is public on GitHub under an MIT license.
 
 One Go tool, `cmd/publish`, standard library only, uploads a built zip to
-both stores over their HTTP APIs: the Chrome Web Store API (OAuth refresh
-token flow, then upload and publish) and the Firefox AMO API (JWT-signed
-upload). It runs two ways:
+both stores over their HTTP APIs: the Chrome Web Store v2 API (OAuth refresh
+token flow, then upload and publish; v2 paths include the publisher id) and
+the Firefox AMO v5 API (HMAC-SHA256 JWT auth, upload, poll validation,
+create version). It runs two ways:
 
 - GitHub Actions: `release.yml` fires on push to `master`, builds, tests,
   and publishes to both stores using repo secrets. It publishes only when
@@ -264,8 +268,11 @@ structure a rule targets, with placeholder ASINs like `B0EXAMPLE01`. No saved
 Amazon pages.
 
 `schedule.ts` and `settings.ts` are pure and get `node:test` coverage with no
-framework dependency, run with `TZ` pinned. Selectors run against the
-fixtures.
+framework dependency, run with `TZ` pinned. The test files are plain JS
+(`test/schedule.test.js`) that `require` the compiled output in `build/`:
+Node isolates required files, so the libs publish their pure functions on
+`globalThis` (`acpScheduleLib`, `acpSettingsLib`), which is harmless in the
+browser. Selectors run against the fixtures.
 
 `cmd/publish` gets `go test` against `httptest` servers with synthetic
 responses. Gates: `go fmt`, `go vet`, `staticcheck`, `errcheck`, `revive`,
@@ -274,7 +281,8 @@ vendored if any appear (none expected).
 
 ## Order of work
 
-**0. Skeleton and automation.** Git repo with `master` and `beta`, MIT
+**0. Skeleton and automation. Done, merged to `master` 2026-08-03.** Git
+repo with `master` and `beta`, MIT
 license, both manifests, the justfile build producing both zips, tsconfig and
 the ambient types, the settings library and defaults, the rule catalogue
 loader and CSS gating, `boot.ts`, `observe.ts`, `layout.ts`, the popup and
@@ -301,3 +309,30 @@ notifications, fuller history view, export.
 Selectors get read off live pages in the phase that needs them, phase 1 for
 the assistant and cart and phase 2 for the rest, rather than written from
 memory. Amazon's class names differ per marketplace and change over time.
+
+## Status (2026-08-03)
+
+Phase 0 is complete and merged to `master`. All gates pass (`tsc` strict,
+6 node tests, `gofmt`, `go vet`, `staticcheck`, `errcheck`, `revive`,
+`go test -race -shuffle=on`) and goaudit reports zero findings: the five
+gosec hits inherent to a publish tool (variable URLs and file paths, a URL
+constant with "token" in its name) are suppressed at the site with reasons,
+and the capslock capability baseline is committed.
+
+Loading the skeleton for a look: `chrome://extensions`, Developer mode,
+"Load unpacked", `dist/chrome/`; Firefox `about:debugging#/runtime/this-firefox`,
+"Load Temporary Add-on", `dist/firefox/manifest.json`. Run `just build`
+first if `dist/` is missing. It should change nothing on any Amazon page
+yet; every selector list is empty by design.
+
+Open before phase 1 ships:
+
+- User checklist above: GitHub repo and remote, both store accounts, the
+  seven repo secrets.
+- `cmd/publish` matches the current docs for both store APIs but has only
+  ever spoken to synthetic httptest servers; the first real publish is part
+  of phase 1's work, not a solved problem.
+
+Phase 1 starts with reading live selectors for `alexa-shopping` and
+`cart-sidebar`, then the real `schedule.ts` (year-boundary tests included),
+quick hide, the popup status line, and the first store submissions.
