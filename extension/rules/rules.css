@@ -1,0 +1,20 @@
+/*
+ * Static hide rules, one block per rule id, gated on a class boot.js sets
+ * on <html>. Selectors are read off live pages in the phase that ships each
+ * rule (phase 1: alexa-shopping, cart-sidebar; phase 2: the rest), so the
+ * blocks below are placeholders until then.
+ *
+ * Every rule uses display: none !important, because Amazon sets inline
+ * styles in places and a specificity fight is otherwise guaranteed.
+ *
+ * Template:
+ *
+ * html.acp-cart-sidebar #nav-cart-flyout,
+ * html.acp-cart-sidebar .some-other-selector {
+ *   display: none !important;
+ * }
+ */
+
+/* alexa-shopping: selectors land in phase 1 */
+
+/* cart-sidebar: selectors land in phase 1 */

@@ -209,9 +209,11 @@ review before going live.
    an OAuth client and refresh token for the Chrome Web Store API.
 3. Create a Firefox Add-ons (AMO) account and generate API credentials (JWT
    issuer and secret).
-4. Add the credentials as GitHub repo secrets: `CWS_EXTENSION_ID`,
-   `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN`,
-   `AMO_JWT_ISSUER`, `AMO_JWT_SECRET`.
+4. Add the credentials as GitHub repo secrets: `CWS_PUBLISHER_ID`,
+   `CWS_EXTENSION_ID`, `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`,
+   `CWS_REFRESH_TOKEN`, `AMO_JWT_ISSUER`, `AMO_JWT_SECRET`. (The AMO
+   add-on id is not a secret; the release workflow reads it out of the
+   Firefox manifest.)
 
 ## Price history (wish list)
 

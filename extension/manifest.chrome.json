@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "Amazon Cleanup",
+  "version": "0.1.0",
+  "description": "Hides Amazon clutter: the shopping assistant, cart sidebar, sponsored content, and pressure banners. Every cleanup is a toggle.",
+  "minimum_chrome_version": "102",
+  "permissions": ["storage", "alarms"],
+  "host_permissions": ["*://*.amazon.com/*"],
+  "optional_host_permissions": [
+    "*://*.amazon.ca/*",
+    "*://*.amazon.com.mx/*",
+    "*://*.amazon.com.br/*",
+    "*://*.amazon.co.uk/*",
+    "*://*.amazon.ie/*",
+    "*://*.amazon.de/*",
+    "*://*.amazon.fr/*",
+    "*://*.amazon.it/*",
+    "*://*.amazon.es/*",
+    "*://*.amazon.nl/*",
+    "*://*.amazon.se/*",
+    "*://*.amazon.pl/*",
+    "*://*.amazon.com.be/*",
+    "*://*.amazon.com.tr/*",
+    "*://*.amazon.sa/*",
+    "*://*.amazon.ae/*",
+    "*://*.amazon.eg/*",
+    "*://*.amazon.in/*",
+    "*://*.amazon.co.jp/*",
+    "*://*.amazon.sg/*",
+    "*://*.amazon.com.au/*"
+  ],
+  "background": {
+    "service_worker": "js/worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.amazon.com/*"],
+      "run_at": "document_start",
+      "css": ["rules/rules.css"],
+      "js": [
+        "js/rules.js",
+        "js/settings.js",
+        "js/schedule.js",
+        "js/layout.js",
+        "js/observe.js",
+        "js/boot.js"
+      ]
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Amazon Cleanup"
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  }
+}
