@@ -48,40 +48,53 @@ function acpRenderGroup(
   return section;
 }
 
-/* Scheduling-capable rules get the three-state select; the rest keep a
-   plain checkbox. */
+/* Every rule is a dropdown naming the area's fate: Hidden, Visible, and
+   (scheduling-capable rules only) Schedule. The displayed words map onto
+   the stored states on/off/scheduled, so existing settings need no
+   migration. Picking Schedule reveals a jump to the options page editor. */
 function acpRenderRule(rule: AcpRule, settings: AcpSettings): HTMLElement {
-  const label = document.createElement("label");
+  const row = document.createElement("label");
+  row.className = "rule";
   const text = document.createElement("span");
   text.textContent = rule.label;
-  if (rule.scheduling) {
-    const select = document.createElement("select");
-    for (const state of ["off", "on", "scheduled"] as const) {
-      const option = document.createElement("option");
-      option.value = state;
-      option.textContent = state.charAt(0).toUpperCase() + state.slice(1);
-      select.appendChild(option);
-    }
-    select.value = settings.rules[rule.id] ?? "off";
+  const select = document.createElement("select");
+  const states: readonly { value: AcpRuleState; text: string }[] = [
+    { value: "on", text: "Hidden" },
+    { value: "off", text: "Visible" },
+    { value: "scheduled", text: "Schedule" },
+  ];
+  const offered = rule.scheduling ? states : states.slice(0, 2);
+  for (const state of offered) {
+    const option = document.createElement("option");
+    option.value = state.value;
+    option.textContent = state.text;
+    select.appendChild(option);
+  }
+  select.value = settings.rules[rule.id] ?? "off";
+  row.appendChild(text);
+  row.appendChild(select);
+  if (!rule.scheduling) {
     select.addEventListener("change", () => {
       settings.rules[rule.id] = select.value as AcpRuleState;
       void acpSaveSettings(settings);
     });
-    label.appendChild(text);
-    label.appendChild(select);
-    label.className = "rule-scheduled";
-    return label;
+    return row;
   }
-  const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
-  checkbox.checked = settings.rules[rule.id] === "on";
-  checkbox.addEventListener("change", () => {
-    settings.rules[rule.id] = checkbox.checked ? "on" : "off";
+  const edit = document.createElement("button");
+  edit.type = "button";
+  edit.className = "edit-schedule";
+  edit.textContent = "Edit schedule";
+  edit.hidden = select.value !== "scheduled";
+  edit.addEventListener("click", () => {
+    void acpExt().runtime.openOptionsPage();
+  });
+  select.addEventListener("change", () => {
+    settings.rules[rule.id] = select.value as AcpRuleState;
+    edit.hidden = select.value !== "scheduled";
     void acpSaveSettings(settings);
   });
-  label.appendChild(checkbox);
-  label.appendChild(text);
-  return label;
+  row.appendChild(edit);
+  return row;
 }
 
 /* "4:12 PM" while the end falls on the current local day, "midnight" for an

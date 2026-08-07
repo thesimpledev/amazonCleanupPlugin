@@ -184,7 +184,12 @@ never shows dead toggles for planned work. The first tab holds the shopping
 assistant and cart together and keeps them together permanently, since they
 are the main focus. Sponsored, navigation, and pressure each get a tab once
 a rule in the group ships. The tab bar stays hidden while only one tab has
-content. Master kill switch at the top that
+content. Every rule renders as a dropdown naming the area's fate, Hidden /
+Visible / Schedule (Hidden and Visible only where scheduling does not
+apply); the words map onto the stored on/off/scheduled states. Picking
+Schedule reveals an "Edit schedule" jump into the options page editor,
+because the real editor does not fit in a popup. Master kill switch at the
+top that
 disables everything without discarding settings. Quick hide button with its
 duration picker. A status line reading "Cart sidebar hidden until Dec 25
 (Christmas)". Schedule editing lives in the options page, which also does

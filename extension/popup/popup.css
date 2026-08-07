@@ -85,8 +85,24 @@ section label {
   padding: 3px 0;
 }
 
-.rule-scheduled {
+.rule {
   justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.rule span {
+  flex: 1;
+}
+
+.edit-schedule {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  color: #8ab4f8;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 #quickhide {
