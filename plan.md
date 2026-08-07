@@ -299,15 +299,18 @@ stubbed, so it loads clean in Chrome and Firefox and changes nothing on the
 page yet. The user works through the store account checklist in parallel.
 
 **1. Parity, then ship.** `alexa-shopping` and `cart-sidebar` with layout
-repair, plus the scheduling that makes the cart worth having: `schedule.ts`,
-the options page schedule editor, alarms, and quick hide. Then the first
+repair, plus the rest of the cart group (`cart-count`, `recently-viewed`,
+`buy-again`, `recommendations`), since those carousels leak gifts exactly
+the way the cart does, plus the scheduling that makes the cart worth
+having: `schedule.ts`, the options page schedule editor, alarms, and quick
+hide. Then the first
 listed submission to the Chrome Web Store and Firefox AMO, so the extension
 is installable from the stores. The two current extensions come off once it
 is live.
 
 **2. Everything else.** The remaining rules: sponsored detection, site
-stripe, navigation, pressure and upsell, the gift-leakage carousels, and gift
-mode. Shipped as store updates through the automation.
+stripe, navigation, pressure and upsell, and gift mode. Shipped as store
+updates through the automation.
 
 **3. Price history (wish list).** Separate version and a fresh review on both
 stores, since it adds a privacy policy and a data disclosure the earlier
