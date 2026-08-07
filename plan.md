@@ -59,9 +59,10 @@ what triggers the padding re-fix.
 LICENSE                       MIT
 justfile                      build | test | publish | clean
 tsconfig.json                 strict, ES2022, outDir build/
-go.mod                        module for cmd/publish
-.goaudit-capslock.json        goaudit capability baseline, committed
-cmd/publish/main.go           store upload tool, standard library only
+publish/                      store upload tool, standard library only
+  go.mod                      its own module; the repo root is not a Go project
+  .goaudit-capslock.json      goaudit capability baseline, committed
+  main.go amo.go chrome.go publish_test.go
 extension/
   manifest.chrome.json
   manifest.firefox.json
@@ -194,7 +195,7 @@ JSON import and export.
 Two branches: `beta` is where work happens, `master` is what deploys. Merges
 only, never rebase. The repository is public on GitHub under an MIT license.
 
-One Go tool, `cmd/publish`, standard library only, uploads a built zip to
+One Go tool in `publish/`, standard library only, uploads a built zip to
 both stores over their HTTP APIs: the Chrome Web Store v2 API (OAuth refresh
 token flow, then upload and publish; v2 paths include the publisher id) and
 the Firefox AMO v5 API (HMAC-SHA256 JWT auth, upload, poll validation,
@@ -280,7 +281,7 @@ Node isolates required files, so the libs publish their pure functions on
 `globalThis` (`acpScheduleLib`, `acpSettingsLib`), which is harmless in the
 browser. Selectors run against the fixtures.
 
-`cmd/publish` gets `go test` against `httptest` servers with synthetic
+The publish tool gets `go test` against `httptest` servers with synthetic
 responses. Gates: `go fmt`, `go vet`, `staticcheck`, `errcheck`, `revive`,
 `go test ./... -race -vet=all -shuffle=on -count=1`, `goaudit`. Dependencies
 vendored if any appear (none expected).
@@ -292,7 +293,8 @@ repo with `master` and `beta`, MIT
 license, both manifests, the justfile build producing both zips, tsconfig and
 the ambient types, the settings library and defaults, the rule catalogue
 loader and CSS gating, `boot.ts`, `observe.ts`, `layout.ts`, the popup and
-options shells, `cmd/publish`, and both GitHub Actions workflows. Rules are
+options shells, the publish tool (now in `publish/`), and both GitHub
+Actions workflows. Rules are
 stubbed, so it loads clean in Chrome and Firefox and changes nothing on the
 page yet. The user works through the store account checklist in parallel.
 
@@ -335,7 +337,7 @@ Open before phase 1 ships:
 
 - User checklist above: GitHub repo and remote, both store accounts, the
   seven repo secrets.
-- `cmd/publish` matches the current docs for both store APIs but has only
+- The publish tool matches the current docs for both store APIs but has only
   ever spoken to synthetic httptest servers; the first real publish is part
   of phase 1's work, not a solved problem.
 

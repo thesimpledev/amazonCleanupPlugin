@@ -1,3 +1,3 @@
-module github.com/thesimpledev/amazonCleanupPlugin
+module github.com/thesimpledev/amazonCleanupPlugin/publish
 
 go 1.26

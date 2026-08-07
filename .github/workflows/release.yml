@@ -52,7 +52,7 @@ jobs:
           CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
           CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
           CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
-        run: go run ./cmd/publish -store chrome -zip dist/chrome.zip
+        run: cd publish && go run . -store chrome -zip ../dist/chrome.zip
       - name: Publish to Firefox AMO
         if: steps.version.outputs.changed == 'true'
         env:
@@ -61,4 +61,4 @@ jobs:
         run: |
           AMO_ADDON_ID="$(jq -r '.browser_specific_settings.gecko.id' extension/manifest.firefox.json)"
           export AMO_ADDON_ID
-          go run ./cmd/publish -store firefox -zip dist/firefox.zip
+          cd publish && go run . -store firefox -zip ../dist/firefox.zip
