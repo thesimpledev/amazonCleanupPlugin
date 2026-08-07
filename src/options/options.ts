@@ -338,10 +338,10 @@ function acpAddSchedule(): void {
 async function acpScheduleEditorInit(): Promise<void> {
   acpSchedules = await acpLoadSchedules();
   acpRenderScheduleList();
-  await acpRenderScheduleUsers();
+  await acpRenderScheduleAreas();
   acpExt().storage.onChanged.addListener((changes, area) => {
     if (area === "sync" && ACP_SETTINGS_KEY in changes) {
-      void acpRenderScheduleUsers();
+      void acpRenderScheduleAreas();
     }
   });
   const kind = document.getElementById("schedule-kind");
@@ -414,27 +414,37 @@ function acpIoInit(): void {
   }
 }
 
-/* Answers "is this schedule for one area or everything" right on the
-   page: it lists the areas currently set to Schedule in the popup. */
-async function acpRenderScheduleUsers(): Promise<void> {
-  const host = document.getElementById("schedule-users");
+/* One checkbox per schedulable area; checked means that area is set to
+   Schedule. This is the same per-rule state the popup dropdown controls,
+   so the two stay in step through storage.onChanged. Unchecking returns
+   the area to Visible. */
+async function acpRenderScheduleAreas(): Promise<void> {
+  const host = document.getElementById("schedule-areas");
   if (!host) {
     return;
   }
   const settings = await acpLoadSettings();
-  const labels = ACP_RULES.filter(
-    (rule) =>
-      rule.shipped &&
-      rule.scheduling &&
-      settings.rules[rule.id] === "scheduled"
-  ).map((rule) => rule.label);
-  if (labels.length === 0) {
-    host.textContent =
-      "No area follows it yet. Set an area to \"Schedule\" in the popup " +
-      "and it will hide during these windows.";
-    return;
+  host.textContent = "";
+  const rules = ACP_RULES.filter(
+    (rule) => rule.shipped && rule.scheduling
+  );
+  for (const rule of rules) {
+    const item = document.createElement("li");
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = settings.rules[rule.id] === "scheduled";
+    checkbox.addEventListener("change", () => {
+      settings.rules[rule.id] = checkbox.checked ? "scheduled" : "off";
+      void acpSaveSettings(settings);
+    });
+    const text = document.createElement("span");
+    text.textContent = rule.label;
+    label.appendChild(checkbox);
+    label.appendChild(text);
+    item.appendChild(label);
+    host.appendChild(item);
   }
-  host.textContent = "Following it now: " + labels.join(", ") + ".";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
