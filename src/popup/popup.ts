@@ -48,10 +48,15 @@ function acpRenderGroup(
   return section;
 }
 
+/* Set by acpRenderTabs once the bottom "Edit shared schedule" link exists;
+   rule rows call it after every change so the link shows exactly while
+   some area is set to Schedule. */
+let acpScheduleLinkUpdate: (() => void) | null = null;
+
 /* Every rule is a dropdown naming the area's fate: Hidden, Visible, and
    (scheduling-capable rules only) Schedule. The displayed words map onto
    the stored states on/off/scheduled, so existing settings need no
-   migration. Picking Schedule reveals a jump to the options page editor. */
+   migration. */
 function acpRenderRule(rule: AcpRule, settings: AcpSettings): HTMLElement {
   const row = document.createElement("label");
   row.className = "rule";
@@ -71,30 +76,39 @@ function acpRenderRule(rule: AcpRule, settings: AcpSettings): HTMLElement {
     select.appendChild(option);
   }
   select.value = settings.rules[rule.id] ?? "off";
+  select.addEventListener("change", () => {
+    settings.rules[rule.id] = select.value as AcpRuleState;
+    void acpSaveSettings(settings);
+    if (acpScheduleLinkUpdate) {
+      acpScheduleLinkUpdate();
+    }
+  });
   row.appendChild(text);
   row.appendChild(select);
-  if (!rule.scheduling) {
-    select.addEventListener("change", () => {
-      settings.rules[rule.id] = select.value as AcpRuleState;
-      void acpSaveSettings(settings);
-    });
-    return row;
-  }
+  return row;
+}
+
+/* The single jump to the options page editor, below every rule row on a
+   tab that has schedulable areas. */
+function acpScheduleLink(settings: AcpSettings): HTMLElement {
   const edit = document.createElement("button");
   edit.type = "button";
   edit.className = "edit-schedule";
   edit.textContent = "Edit shared schedule";
-  edit.hidden = select.value !== "scheduled";
   edit.addEventListener("click", () => {
     void acpExt().runtime.openOptionsPage();
   });
-  select.addEventListener("change", () => {
-    settings.rules[rule.id] = select.value as AcpRuleState;
-    edit.hidden = select.value !== "scheduled";
-    void acpSaveSettings(settings);
-  });
-  row.appendChild(edit);
-  return row;
+  const update = (): void => {
+    edit.hidden = !ACP_RULES.some(
+      (rule) =>
+        rule.shipped &&
+        rule.scheduling &&
+        settings.rules[rule.id] === "scheduled"
+    );
+  };
+  acpScheduleLinkUpdate = update;
+  update();
+  return edit;
 }
 
 /* "4:12 PM" while the end falls on the current local day, "midnight" for an
@@ -203,6 +217,15 @@ function acpRenderTabs(
     panel.className = "tab-panel";
     for (const section of sections) {
       panel.appendChild(section);
+    }
+    const hasSchedulable = ACP_RULES.some(
+      (rule) =>
+        rule.shipped &&
+        rule.scheduling &&
+        tab.groups.includes(rule.group)
+    );
+    if (hasSchedulable) {
+      panel.appendChild(acpScheduleLink(settings));
     }
     const button = document.createElement("button");
     button.type = "button";
