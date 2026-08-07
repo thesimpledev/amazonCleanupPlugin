@@ -13,12 +13,23 @@
       <span>Enabled</span>
     </label>
   </header>
+  <div id="status" hidden></div>
   <nav id="tabs" hidden></nav>
   <main id="groups"></main>
+  <div id="quickhide">
+    <select id="quickhide-duration">
+      <option value="1h">1 hour</option>
+      <option value="4h">4 hours</option>
+      <option value="midnight">Until midnight</option>
+      <option value="restart">Until restart</option>
+    </select>
+    <button id="quickhide-start" type="button">Quick hide</button>
+  </div>
   <footer>
     <button id="open-options" type="button">Options</button>
   </footer>
   <script src="../js/rules.js"></script>
+  <script src="../js/schedule.js"></script>
   <script src="../js/settings.js"></script>
   <script src="../js/popup.js"></script>
 </body>

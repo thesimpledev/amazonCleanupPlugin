@@ -20,12 +20,36 @@
   <section>
     <h2>Schedules</h2>
     <p>
-      Schedule editing (date ranges, annual occasions, weekly windows) and
-      JSON import and export arrive in a later version.
+      While a schedule window is active, every cart cleanup set to
+      "Scheduled" in the popup is hidden.
     </p>
+    <ul id="schedule-list"></ul>
+    <div id="schedule-add">
+      <select id="schedule-kind">
+        <option value="range">Date range</option>
+        <option value="annual">Annual</option>
+        <option value="weekly">Weekly</option>
+      </select>
+      <input id="schedule-label" type="text" placeholder="Label (optional)">
+      <span id="schedule-fields"></span>
+      <button id="schedule-add-button" type="button">Add</button>
+    </div>
+    <p id="schedule-message"></p>
+  </section>
+
+  <section>
+    <h2>Import and export</h2>
+    <p>Settings and schedules as JSON.</p>
+    <textarea id="io-text" rows="8" spellcheck="false"></textarea>
+    <div>
+      <button id="io-export" type="button">Export</button>
+      <button id="io-import" type="button">Import</button>
+    </div>
+    <p id="io-message"></p>
   </section>
 
   <script src="../js/rules.js"></script>
+  <script src="../js/schedule.js"></script>
   <script src="../js/settings.js"></script>
   <script src="../js/marketplaces.js"></script>
   <script src="../js/options.js"></script>

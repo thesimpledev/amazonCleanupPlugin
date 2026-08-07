@@ -14,8 +14,11 @@ function acpApplyHiddenClasses(hidden: readonly string[]): void {
 }
 
 async function acpReconcile(): Promise<void> {
+  const nowMillis = Date.now();
   const settings = await acpLoadSettings();
-  const hidden = acpHiddenRuleIds(settings);
+  const schedules = await acpLoadSchedules();
+  const quickHide = await acpReadQuickHideActive(nowMillis);
+  const hidden = acpHiddenRuleIds(settings, schedules, quickHide, nowMillis);
   acpApplyHiddenClasses(hidden);
   acpWriteMirror(hidden);
   acpLayoutRepair();
@@ -24,11 +27,21 @@ async function acpReconcile(): Promise<void> {
 (function acpBoot(): void {
   const mirrored = acpReadMirror();
   acpApplyHiddenClasses(
-    mirrored ?? acpHiddenRuleIds(acpDefaultSettings())
+    mirrored ?? acpHiddenRuleIds(acpDefaultSettings(), [], false, Date.now())
   );
   void acpReconcile();
   acpExt().storage.onChanged.addListener((changes, area) => {
-    if (area === "sync" && ACP_SETTINGS_KEY in changes) {
+    if (
+      area === "sync" &&
+      (ACP_SETTINGS_KEY in changes || ACP_SCHEDULES_KEY in changes)
+    ) {
+      void acpReconcile();
+      return;
+    }
+    if (
+      (area === "local" || area === "session") &&
+      (ACP_QUICKHIDE_KEY in changes || ACP_PULSE_KEY in changes)
+    ) {
       void acpReconcile();
     }
   });

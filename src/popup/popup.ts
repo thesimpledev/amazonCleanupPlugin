@@ -43,21 +43,114 @@ function acpRenderGroup(
   heading.textContent = ACP_GROUP_LABELS[group];
   section.appendChild(heading);
   for (const rule of rules) {
-    const label = document.createElement("label");
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = settings.rules[rule.id] === true;
-    checkbox.addEventListener("change", () => {
-      settings.rules[rule.id] = checkbox.checked;
-      void acpSaveSettings(settings);
-    });
-    const text = document.createElement("span");
-    text.textContent = rule.label;
-    label.appendChild(checkbox);
-    label.appendChild(text);
-    section.appendChild(label);
+    section.appendChild(acpRenderRule(rule, settings));
   }
   return section;
+}
+
+/* Scheduling-capable rules get the three-state select; the rest keep a
+   plain checkbox. */
+function acpRenderRule(rule: AcpRule, settings: AcpSettings): HTMLElement {
+  const label = document.createElement("label");
+  const text = document.createElement("span");
+  text.textContent = rule.label;
+  if (rule.scheduling) {
+    const select = document.createElement("select");
+    for (const state of ["off", "on", "scheduled"] as const) {
+      const option = document.createElement("option");
+      option.value = state;
+      option.textContent = state.charAt(0).toUpperCase() + state.slice(1);
+      select.appendChild(option);
+    }
+    select.value = settings.rules[rule.id] ?? "off";
+    select.addEventListener("change", () => {
+      settings.rules[rule.id] = select.value as AcpRuleState;
+      void acpSaveSettings(settings);
+    });
+    label.appendChild(text);
+    label.appendChild(select);
+    label.className = "rule-scheduled";
+    return label;
+  }
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.checked = settings.rules[rule.id] === "on";
+  checkbox.addEventListener("change", () => {
+    settings.rules[rule.id] = checkbox.checked ? "on" : "off";
+    void acpSaveSettings(settings);
+  });
+  label.appendChild(checkbox);
+  label.appendChild(text);
+  return label;
+}
+
+/* "4:12 PM" while the end falls on the current local day, "midnight" for an
+   end at the coming local midnight, "Dec 25" otherwise. The end instant is
+   exclusive, so the day it names comes from the instant just before it. */
+function acpFormatUntil(endMillis: number, nowMillis: number): string {
+  const lastInstant = new Date(endMillis - 1);
+  const now = new Date(nowMillis);
+  const sameDay =
+    lastInstant.getFullYear() === now.getFullYear() &&
+    lastInstant.getMonth() === now.getMonth() &&
+    lastInstant.getDate() === now.getDate();
+  if (!sameDay) {
+    return lastInstant.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+  }
+  const end = new Date(endMillis);
+  if (end.getHours() === 0 && end.getMinutes() === 0) {
+    return "midnight";
+  }
+  return end.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+async function acpRenderStatus(settings: AcpSettings): Promise<void> {
+  const status = document.getElementById("status");
+  if (!status) {
+    return;
+  }
+  const nowMillis = Date.now();
+  const local = await acpExt().storage.local.get(ACP_QUICKHIDE_KEY);
+  const session = await acpExt().storage.session.get(ACP_QUICKHIDE_KEY);
+  if (session[ACP_QUICKHIDE_KEY] === true) {
+    status.textContent = "Quick hide active until restart";
+    status.hidden = false;
+    return;
+  }
+  const expiry = local[ACP_QUICKHIDE_KEY];
+  if (typeof expiry === "number" && expiry > nowMillis) {
+    status.textContent =
+      "Quick hide active until " + acpFormatUntil(expiry, nowMillis);
+    status.hidden = false;
+    return;
+  }
+  const schedules = await acpLoadSchedules();
+  const activeWindow = acpActiveWindow(schedules, nowMillis);
+  if (activeWindow !== null) {
+    const labels = ACP_RULES.filter(
+      (rule) =>
+        rule.shipped &&
+        rule.scheduling &&
+        settings.rules[rule.id] === "scheduled"
+    ).map((rule) => rule.label);
+    if (labels.length > 0) {
+      const name = activeWindow.schedule.label;
+      status.textContent =
+        labels.join(", ") +
+        " hidden until " +
+        acpFormatUntil(activeWindow.endMillis, nowMillis) +
+        (name ? " (" + name + ")" : "");
+      status.hidden = false;
+      return;
+    }
+  }
+  status.hidden = true;
 }
 
 interface AcpTabEntry {
@@ -131,6 +224,20 @@ async function acpPopupInit(): Promise<void> {
   if (tabsHost && groupsHost) {
     acpRenderTabs(tabsHost, groupsHost, settings);
   }
+  const quickHideButton = document.getElementById("quickhide-start");
+  const quickHideDuration = document.getElementById("quickhide-duration");
+  if (
+    quickHideButton instanceof HTMLButtonElement &&
+    quickHideDuration instanceof HTMLSelectElement
+  ) {
+    quickHideButton.addEventListener("click", () => {
+      void acpStartQuickHide(
+        quickHideDuration.value as AcpQuickHideChoice,
+        Date.now()
+      ).then(() => acpRenderStatus(settings));
+    });
+  }
+  void acpRenderStatus(settings);
   const optionsButton = document.getElementById("open-options");
   if (optionsButton) {
     optionsButton.addEventListener("click", () => {
