@@ -26,6 +26,33 @@ h1 {
   gap: 6px;
 }
 
+#tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* display: flex would otherwise override the hidden attribute. */
+#tabs[hidden] {
+  display: none;
+}
+
+.tab {
+  border: none;
+  background: none;
+  padding: 6px 10px;
+  font: inherit;
+  cursor: pointer;
+  color: #6b6b6b;
+  border-bottom: 2px solid transparent;
+}
+
+.tab.active {
+  color: #1a1a1a;
+  border-bottom-color: #1a1a1a;
+}
+
 main {
   padding: 4px 12px 8px;
 }

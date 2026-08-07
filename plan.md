@@ -177,7 +177,13 @@ minute alarm, and on a one-shot alarm set for the next computed transition.
 
 ## Popup
 
-Sliders grouped by category, collapsible. Master kill switch at the top that
+Tabbed, and only shipped rules render. Each rule carries a `shipped` flag in
+the catalogue; unshipped entries stay out of the popup entirely, so the UI
+never shows dead toggles for planned work. The first tab holds the shopping
+assistant and cart together and keeps them together permanently, since they
+are the main focus. Sponsored, navigation, and pressure each get a tab once
+a rule in the group ships. The tab bar stays hidden while only one tab has
+content. Master kill switch at the top that
 disables everything without discarding settings. Quick hide button with its
 duration picker. A status line reading "Cart sidebar hidden until Dec 25
 (Christmas)". Schedule editing lives in the options page, which also does
