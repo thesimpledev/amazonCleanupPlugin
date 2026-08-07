@@ -108,8 +108,9 @@ service worker.
 
 Permissions are `storage` and `alarms`. Chrome match patterns cannot wildcard
 a TLD, so `*://*.amazon.*/*` is invalid and every marketplace is listed
-explicitly in `marketplaces.ts`. amazon.com ships in `host_permissions`; the
-rest sit in `optional_host_permissions` and the options page requests them.
+explicitly in `marketplaces.ts`. Every marketplace ships in
+`host_permissions` and in the content script matches of both manifests, so
+all storefronts work from install with nothing to enable anywhere.
 
 Settings live in `storage.sync`, with all schedules under a single key
 (mindful of the 8KB per-item quota) and options page saves debounced (sync

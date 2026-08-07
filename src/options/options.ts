@@ -1,8 +1,8 @@
 /*
- * Options page: the marketplace list (read-only until optional host
- * permission requests land in a later phase), the schedule editor, and
- * JSON import and export. Schedule saves are debounced because
- * storage.sync rate-limits writes.
+ * Options page: the shared schedule editor and JSON import and export.
+ * Schedule saves are debounced because storage.sync rate-limits writes.
+ * Every marketplace is enabled from install, so there is nothing to
+ * configure about them here.
  */
 
 const ACP_MONTH_NAMES = [
@@ -338,6 +338,12 @@ function acpAddSchedule(): void {
 async function acpScheduleEditorInit(): Promise<void> {
   acpSchedules = await acpLoadSchedules();
   acpRenderScheduleList();
+  await acpRenderScheduleUsers();
+  acpExt().storage.onChanged.addListener((changes, area) => {
+    if (area === "sync" && ACP_SETTINGS_KEY in changes) {
+      void acpRenderScheduleUsers();
+    }
+  });
   const kind = document.getElementById("schedule-kind");
   if (kind instanceof HTMLSelectElement) {
     acpRenderScheduleFields(kind.value);
@@ -408,25 +414,30 @@ function acpIoInit(): void {
   }
 }
 
-function acpOptionsInit(): void {
-  const list = document.getElementById("marketplaces");
-  if (!list) {
+/* Answers "is this schedule for one area or everything" right on the
+   page: it lists the areas currently set to Schedule in the popup. */
+async function acpRenderScheduleUsers(): Promise<void> {
+  const host = document.getElementById("schedule-users");
+  if (!host) {
     return;
   }
-  for (const marketplace of ACP_MARKETPLACES) {
-    const item = document.createElement("li");
-    item.textContent = marketplace.defaultEnabled
-      ? marketplace.host + " (enabled)"
-      : marketplace.host;
-    if (marketplace.defaultEnabled) {
-      item.className = "enabled";
-    }
-    list.appendChild(item);
+  const settings = await acpLoadSettings();
+  const labels = ACP_RULES.filter(
+    (rule) =>
+      rule.shipped &&
+      rule.scheduling &&
+      settings.rules[rule.id] === "scheduled"
+  ).map((rule) => rule.label);
+  if (labels.length === 0) {
+    host.textContent =
+      "No area follows it yet. Set an area to \"Schedule\" in the popup " +
+      "and it will hide during these windows.";
+    return;
   }
+  host.textContent = "Following it now: " + labels.join(", ") + ".";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  acpOptionsInit();
   void acpScheduleEditorInit();
   acpIoInit();
 });

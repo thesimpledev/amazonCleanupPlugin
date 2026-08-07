@@ -13,8 +13,8 @@
     }
   },
   "permissions": ["storage", "alarms"],
-  "host_permissions": ["*://*.amazon.com/*"],
-  "optional_host_permissions": [
+  "host_permissions": [
+    "*://*.amazon.com/*",
     "*://*.amazon.ca/*",
     "*://*.amazon.com.mx/*",
     "*://*.amazon.com.br/*",
@@ -47,7 +47,30 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.amazon.com/*"],
+      "matches": [
+        "*://*.amazon.com/*",
+        "*://*.amazon.ca/*",
+        "*://*.amazon.com.mx/*",
+        "*://*.amazon.com.br/*",
+        "*://*.amazon.co.uk/*",
+        "*://*.amazon.ie/*",
+        "*://*.amazon.de/*",
+        "*://*.amazon.fr/*",
+        "*://*.amazon.it/*",
+        "*://*.amazon.es/*",
+        "*://*.amazon.nl/*",
+        "*://*.amazon.se/*",
+        "*://*.amazon.pl/*",
+        "*://*.amazon.com.be/*",
+        "*://*.amazon.com.tr/*",
+        "*://*.amazon.sa/*",
+        "*://*.amazon.ae/*",
+        "*://*.amazon.eg/*",
+        "*://*.amazon.in/*",
+        "*://*.amazon.co.jp/*",
+        "*://*.amazon.sg/*",
+        "*://*.amazon.com.au/*"
+      ],
       "run_at": "document_start",
       "css": ["rules/rules.css"],
       "js": [

@@ -83,7 +83,7 @@ function acpRenderRule(rule: AcpRule, settings: AcpSettings): HTMLElement {
   const edit = document.createElement("button");
   edit.type = "button";
   edit.className = "edit-schedule";
-  edit.textContent = "Edit schedule";
+  edit.textContent = "Edit shared schedule";
   edit.hidden = select.value !== "scheduled";
   edit.addEventListener("click", () => {
     void acpExt().runtime.openOptionsPage();
