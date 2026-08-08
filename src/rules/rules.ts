@@ -93,7 +93,16 @@ const ACP_RULES: readonly AcpRule[] = [
     defaultOn: false,
     shipped: true,
     scheduling: true,
-    selectors: [],
+    selectors: [
+      '[id^="gwm-asin-tile"]',
+      '[id^="quad-multi-asin-card"]',
+      '[id^="npack-asin-card"]',
+      '[id^="hp-mosaic-container"]',
+      'div[id^="CardInstance"]:has([id^="gwm-asin-tile"])',
+      'div[id^="CardInstance"]:has([id^="quad-multi-asin-card"])',
+      'div[id^="CardInstance"]:has([id^="npack-asin-card"])',
+      'div[id^="CardInstance"]:has([id^="hp-mosaic-container"])',
+    ],
   },
   {
     id: "sponsored-results",

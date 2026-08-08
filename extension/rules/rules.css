@@ -61,5 +61,23 @@ html.acp-buy-again div[id^="CardInstance"]:has([id^="r1c-"]) {
   display: none !important;
 }
 
-/* recommendations: product-page carousels; selectors pending a product
-   page capture. */
+/* recommendations: the personalized homepage grid cards. Of the gateway
+   widget types, four carry product recommendations (asin tiles, quad
+   cards, npack cards, and the deals mosaics); creative, video, and
+   category cards are generic merchandising and stay. Hiding the widget
+   leaves the card shell, so the CardInstance wrappers (randomized ids)
+   go too via :has(). This also catches the homepage buy-it-again card,
+   which uses the same tile widget. */
+html.acp-recommendations [id^="gwm-asin-tile"],
+html.acp-recommendations [id^="quad-multi-asin-card"],
+html.acp-recommendations [id^="npack-asin-card"],
+html.acp-recommendations [id^="hp-mosaic-container"] {
+  display: none !important;
+}
+
+html.acp-recommendations div[id^="CardInstance"]:has([id^="gwm-asin-tile"]),
+html.acp-recommendations div[id^="CardInstance"]:has([id^="quad-multi-asin-card"]),
+html.acp-recommendations div[id^="CardInstance"]:has([id^="npack-asin-card"]),
+html.acp-recommendations div[id^="CardInstance"]:has([id^="hp-mosaic-container"]) {
+  display: none !important;
+}
