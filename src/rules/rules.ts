@@ -39,6 +39,8 @@ const ACP_RULES: readonly AcpRule[] = [
     selectors: [
       "#nav-rufus-disco",
       "#nav-rufus-content",
+      "#nav-flyout-rufus",
+      "#nav-assist-product-summary",
       "#rufus-container",
       "#rufus-dsk-container",
       "#rufus-dsk-container-overlay",
@@ -71,7 +73,7 @@ const ACP_RULES: readonly AcpRule[] = [
     defaultOn: false,
     shipped: true,
     scheduling: true,
-    selectors: ["#nav-recently-viewed"],
+    selectors: ["#nav-recently-viewed", "#rhf"],
   },
   {
     id: "buy-again",
@@ -94,6 +96,7 @@ const ACP_RULES: readonly AcpRule[] = [
     shipped: true,
     scheduling: true,
     selectors: [
+      "#rhf",
       '[id^="gwm-asin-tile"]',
       '[id^="quad-multi-asin-card"]',
       '[id^="npack-asin-card"]',

@@ -14,9 +14,12 @@
  * survive on engines without :has().
  */
 
-/* alexa-shopping: the Rufus / Alexa panel, its nav button, and overlay. */
+/* alexa-shopping: the Rufus / Alexa panel, its nav button and flyout,
+   the product-page assistant summary, and the overlay. */
 html.acp-alexa-shopping #nav-rufus-disco,
 html.acp-alexa-shopping #nav-rufus-content,
+html.acp-alexa-shopping #nav-flyout-rufus,
+html.acp-alexa-shopping #nav-assist-product-summary,
 html.acp-alexa-shopping #rufus-container,
 html.acp-alexa-shopping #rufus-dsk-container,
 html.acp-alexa-shopping #rufus-dsk-container-overlay {
@@ -44,8 +47,12 @@ html.acp-cart-count #nav-cart-count {
   display: none !important;
 }
 
-/* recently-viewed: the nav browsing-history entry and its flyout. */
-html.acp-recently-viewed #nav-recently-viewed {
+/* recently-viewed: the nav browsing-history entry and its flyout, and
+   the bottom-of-page "recently viewed items and featured
+   recommendations" strip, which both this rule and recommendations
+   claim because it mixes the two kinds of content. */
+html.acp-recently-viewed #nav-recently-viewed,
+html.acp-recently-viewed #rhf {
   display: none !important;
 }
 
@@ -68,6 +75,7 @@ html.acp-buy-again div[id^="CardInstance"]:has([id^="r1c-"]) {
    leaves the card shell, so the CardInstance wrappers (randomized ids)
    go too via :has(). This also catches the homepage buy-it-again card,
    which uses the same tile widget. */
+html.acp-recommendations #rhf,
 html.acp-recommendations [id^="gwm-asin-tile"],
 html.acp-recommendations [id^="quad-multi-asin-card"],
 html.acp-recommendations [id^="npack-asin-card"],
