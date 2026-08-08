@@ -1,20 +1,65 @@
 /*
  * Static hide rules, one block per rule id, gated on a class boot.js sets
- * on <html>. Selectors are read off live pages in the phase that ships each
- * rule (phase 1: alexa-shopping, cart-sidebar; phase 2: the rest), so the
- * blocks below are placeholders until then.
+ * on <html>. Selectors were read off live amazon.com pages (2026-08-08);
+ * they mirror the catalogue in rules.ts, and the selectors test keeps the
+ * two in step.
  *
  * Every rule uses display: none !important, because Amazon sets inline
- * styles in places and a specificity fight is otherwise guaranteed.
+ * styles in places and a specificity fight is otherwise guaranteed. The
+ * body padding resets also carry !important for the same reason: Amazon
+ * reserves panel room with inline padding on body.
  *
- * Template:
- *
- * html.acp-cart-sidebar #nav-cart-flyout,
- * html.acp-cart-sidebar .some-other-selector {
- *   display: none !important;
- * }
+ * :has() selectors sit in their own blocks: an unsupported selector
+ * invalidates its whole selector list, and the plain fallbacks must
+ * survive on engines without :has().
  */
 
-/* alexa-shopping: selectors land in phase 1 */
+/* alexa-shopping: the Rufus / Alexa panel, its nav button, and overlay. */
+html.acp-alexa-shopping #nav-rufus-disco,
+html.acp-alexa-shopping #nav-rufus-content,
+html.acp-alexa-shopping #rufus-container,
+html.acp-alexa-shopping #rufus-dsk-container,
+html.acp-alexa-shopping #rufus-dsk-container-overlay {
+  display: none !important;
+}
 
-/* cart-sidebar: selectors land in phase 1 */
+/* The docked panel reserves room with inline padding-left on body. */
+html.acp-alexa-shopping body {
+  padding-left: 0 !important;
+}
+
+/* cart-sidebar: the persistent cart flyout on the right edge. */
+html.acp-cart-sidebar #nav-flyout-ewc,
+html.acp-cart-sidebar #ewc-content {
+  display: none !important;
+}
+
+/* The sidebar reserves room with inline padding-right on body. */
+html.acp-cart-sidebar body {
+  padding-right: 0 !important;
+}
+
+/* cart-count: the item count badge on the nav cart icon. */
+html.acp-cart-count #nav-cart-count {
+  display: none !important;
+}
+
+/* recently-viewed: the nav browsing-history entry and its flyout. */
+html.acp-recently-viewed #nav-recently-viewed {
+  display: none !important;
+}
+
+/* buy-again: the buy-it-again recommendation widget. */
+html.acp-buy-again #r1cContentContainer,
+html.acp-buy-again [id^="r1c-mobile-list_nav-high-confidence-slot"] {
+  display: none !important;
+}
+
+/* The homepage card wrapping the widget has a randomized CardInstance id,
+   so the card itself is only reachable through :has(). */
+html.acp-buy-again div[id^="CardInstance"]:has([id^="r1c-"]) {
+  display: none !important;
+}
+
+/* recommendations: product-page carousels; selectors pending a product
+   page capture. */

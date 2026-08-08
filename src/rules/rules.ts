@@ -36,7 +36,13 @@ const ACP_RULES: readonly AcpRule[] = [
     defaultOn: true,
     shipped: true,
     scheduling: false,
-    selectors: [],
+    selectors: [
+      "#nav-rufus-disco",
+      "#nav-rufus-content",
+      "#rufus-container",
+      "#rufus-dsk-container",
+      "#rufus-dsk-container-overlay",
+    ],
     layoutFix: "resetBodyPadding",
   },
   {
@@ -46,7 +52,7 @@ const ACP_RULES: readonly AcpRule[] = [
     defaultOn: true,
     shipped: true,
     scheduling: true,
-    selectors: [],
+    selectors: ["#nav-flyout-ewc", "#ewc-content"],
     layoutFix: "resetBodyPadding",
   },
   {
@@ -56,7 +62,7 @@ const ACP_RULES: readonly AcpRule[] = [
     defaultOn: false,
     shipped: true,
     scheduling: true,
-    selectors: [],
+    selectors: ["#nav-cart-count"],
   },
   {
     id: "recently-viewed",
@@ -65,7 +71,7 @@ const ACP_RULES: readonly AcpRule[] = [
     defaultOn: false,
     shipped: true,
     scheduling: true,
-    selectors: [],
+    selectors: ["#nav-recently-viewed"],
   },
   {
     id: "buy-again",
@@ -74,7 +80,11 @@ const ACP_RULES: readonly AcpRule[] = [
     defaultOn: false,
     shipped: true,
     scheduling: true,
-    selectors: [],
+    selectors: [
+      "#r1cContentContainer",
+      '[id^="r1c-mobile-list_nav-high-confidence-slot"]',
+      'div[id^="CardInstance"]:has([id^="r1c-"])',
+    ],
   },
   {
     id: "recommendations",
