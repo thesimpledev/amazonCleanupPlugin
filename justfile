@@ -24,7 +24,7 @@ assemble target:
     cp build/content/boot.js build/content/observe.js build/content/layout.js dist/{{target}}/js/
     cp build/background/worker.js dist/{{target}}/js/
     cp build/popup/popup.js build/options/options.js dist/{{target}}/js/
-    cp -r extension/rules extension/popup extension/options dist/{{target}}/
+    cp -r extension/rules extension/popup extension/options extension/icons dist/{{target}}/
     cp extension/manifest.{{target}}.json dist/{{target}}/manifest.json
 
 test: build

@@ -1,9 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "Amazon Cleanup",
+  "name": "Cleanup for Amazon",
   "version": "0.1.0",
   "description": "Hides Amazon clutter: the shopping assistant, cart sidebar, sponsored content, and pressure banners. Every cleanup is a toggle.",
   "minimum_chrome_version": "102",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "permissions": ["storage", "alarms"],
   "host_permissions": [
     "*://*.amazon.com/*",
@@ -72,7 +77,12 @@
   ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Amazon Cleanup"
+    "default_title": "Cleanup for Amazon",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
   },
   "options_ui": {
     "page": "options/options.html",
