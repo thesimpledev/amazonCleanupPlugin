@@ -35,12 +35,12 @@ jobs:
       - name: Install TypeScript compiler
         if: steps.version.outputs.changed == 'true'
         run: npm install -g typescript
-      - name: Install Go lint tools
+      - name: Check out the publish tool
         if: steps.version.outputs.changed == 'true'
-        run: |
-          go install honnef.co/go/tools/cmd/staticcheck@latest
-          go install github.com/kisielk/errcheck@latest
-          go install github.com/mgechev/revive@latest
+        uses: actions/checkout@v4
+        with:
+          repository: thesimpledev/extensionPublisher
+          path: publisher
       - name: Build and test
         if: steps.version.outputs.changed == 'true'
         run: just test
@@ -52,7 +52,7 @@ jobs:
           CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
           CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
           CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
-        run: cd publish && go run . -store chrome -zip ../dist/chrome.zip
+        run: cd publisher && go run . -store chrome -zip ../dist/chrome.zip
       - name: Publish to Firefox AMO
         if: steps.version.outputs.changed == 'true'
         env:
@@ -61,4 +61,4 @@ jobs:
         run: |
           AMO_ADDON_ID="$(jq -r '.browser_specific_settings.gecko.id' extension/manifest.firefox.json)"
           export AMO_ADDON_ID
-          cd publish && go run . -store firefox -zip ../dist/firefox.zip
+          cd publisher && go run . -store firefox -zip ../dist/firefox.zip

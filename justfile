@@ -29,16 +29,13 @@ assemble target:
 
 test: build
     TZ=America/New_York node --test
-    cd publish && test -z "$(gofmt -l .)"
-    cd publish && go vet ./...
-    cd publish && staticcheck ./...
-    cd publish && errcheck ./...
-    cd publish && revive -set_exit_status ./...
-    cd publish && go test ./... -race -vet=all -shuffle=on -count=1
+
+# The upload tool lives in its own repo, expected as a sibling checkout.
+publisher := "../extensionPublisher"
 
 publish: build
-    cd publish && go run . -store chrome -zip ../dist/chrome.zip -credentials "{{credentials}}"
-    cd publish && go run . -store firefox -zip ../dist/firefox.zip -credentials "{{credentials}}"
+    cd {{publisher}} && go run . -store chrome -zip {{justfile_directory()}}/dist/chrome.zip -credentials "{{credentials}}"
+    cd {{publisher}} && go run . -store firefox -zip {{justfile_directory()}}/dist/firefox.zip -credentials "{{credentials}}"
 
 clean:
     rm -rf build dist

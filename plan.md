@@ -59,11 +59,8 @@ what triggers the padding re-fix.
 LICENSE                       MIT
 justfile                      build | test | publish | clean
 tsconfig.json                 strict, ES2022, outDir build/
-publish/                      store upload tool, standard library only
-  go.mod                      its own module; the repo root is not a Go project
-  .goaudit-capslock.json      goaudit capability baseline, committed
-  main.go amo.go chrome.go publish_test.go
 extension/
+  icons/icon-16.png icon-48.png icon-128.png
   manifest.chrome.json
   manifest.firefox.json
   rules/rules.css
@@ -201,18 +198,20 @@ JSON import and export.
 Two branches: `beta` is where work happens, `master` is what deploys. Merges
 only, never rebase. The repository is public on GitHub under an MIT license.
 
-One Go tool in `publish/`, standard library only, uploads a built zip to
-both stores over their HTTP APIs: the Chrome Web Store v2 API (OAuth refresh
-token flow, then upload and publish; v2 paths include the publisher id) and
-the Firefox AMO v5 API (HMAC-SHA256 JWT auth, upload, poll validation,
-create version). It runs two ways:
+Store uploads use the publisher tool, a separate repo
+(`thesimpledev/extensionPublisher`, Go, standard library only). It uploads
+a built zip to both stores over their HTTP APIs: the Chrome Web Store v2
+API (OAuth refresh token flow, then upload and publish; v2 paths include
+the publisher id) and the Firefox AMO v5 API (HMAC-SHA256 JWT auth,
+upload, poll validation, create version). It runs two ways:
 
 - GitHub Actions: `release.yml` fires on push to `master`, builds, tests,
-  and publishes to both stores using repo secrets. It publishes only when
-  the manifest version changed, so a docs-only merge does not attempt a
-  release. `ci.yml` runs build and tests on `beta` pushes and pull requests.
-- Locally: `just publish` runs the same tool with credentials from a file
-  outside the repo.
+  checks out the publisher repo, and publishes to both stores using repo
+  secrets. It publishes only when the manifest version changed, so a
+  docs-only merge does not attempt a release. `ci.yml` runs build and
+  tests on `beta` pushes and pull requests.
+- Locally: `just publish` runs the tool from a sibling checkout at
+  `../extensionPublisher` with credentials from a file outside the repo.
 
 The first listing on each store is created manually through the dashboards
 (name, description, screenshots, privacy answers). Automation handles every
@@ -287,10 +286,8 @@ Node isolates required files, so the libs publish their pure functions on
 `globalThis` (`acpScheduleLib`, `acpSettingsLib`), which is harmless in the
 browser. Selectors run against the fixtures.
 
-The publish tool gets `go test` against `httptest` servers with synthetic
-responses. Gates: `go fmt`, `go vet`, `staticcheck`, `errcheck`, `revive`,
-`go test ./... -race -vet=all -shuffle=on -count=1`, `goaudit`. Dependencies
-vendored if any appear (none expected).
+The publish tool and its tests live in the `thesimpledev/extensionPublisher`
+repo, along with its Go gates and goaudit baseline.
 
 ## Order of work
 
@@ -299,7 +296,7 @@ repo with `master` and `beta`, MIT
 license, both manifests, the justfile build producing both zips, tsconfig and
 the ambient types, the settings library and defaults, the rule catalogue
 loader and CSS gating, `boot.ts`, `observe.ts`, `layout.ts`, the popup and
-options shells, the publish tool (now in `publish/`), and both GitHub
+options shells, the publish tool (since moved to its own repo), and both GitHub
 Actions workflows. Rules are
 stubbed, so it loads clean in Chrome and Firefox and changes nothing on the
 page yet. The user works through the store account checklist in parallel.
