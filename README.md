@@ -56,8 +56,7 @@ just build
 ```
 
 Requirements: the TypeScript compiler (`tsc`), [just](https://github.com/casey/just),
-`zip`, and Go only if you also run the store upload step. No npm install,
-no bundler.
+and `zip`. No npm install, no bundler.
 
 Then load it:
 
