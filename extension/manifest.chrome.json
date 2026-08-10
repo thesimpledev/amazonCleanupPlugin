@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Cleanup for Amazon",
   "version": "0.1.0",
-  "description": "Hides Amazon clutter: the shopping assistant, cart sidebar, sponsored content, and pressure banners. Every cleanup is a toggle.",
+  "description": "Hides Amazon clutter you choose: the shopping assistant, cart sidebar, and recommendations, with schedules for gift season.",
   "minimum_chrome_version": "102",
   "icons": {
     "16": "icons/icon-16.png",
