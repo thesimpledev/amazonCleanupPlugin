@@ -203,18 +203,17 @@ Store uploads use the publisher tool, a separate repo
 a built zip to both stores over their HTTP APIs: the Chrome Web Store v2
 API (OAuth refresh token flow, then upload and publish; v2 paths include
 the publisher id) and the Firefox AMO v5 API (HMAC-SHA256 JWT auth,
-upload, poll validation, create version). It runs two ways:
+upload, poll validation, create version).
 
-- GitHub Actions: `release.yml` fires on push to `master`, builds, tests,
-  checks out the publisher repo, and publishes to both stores using repo
-  secrets. It publishes only when the manifest version changed, so a
-  docs-only merge does not attempt a release. `ci.yml` runs build and
-  tests on `beta` pushes and pull requests.
-- Locally: `just publish` runs the tool from a sibling checkout at
-  `../extensionPublisher` with credentials from a file outside the repo.
+Releases are local, not GitHub Actions: merge `beta` into `master`, bump
+the manifest version, then `just publish`, which runs the tool from a
+sibling checkout at `../extensionPublisher` with credentials from a file
+outside the repo (`~/.config/amazon-cleanup/credentials.json` by
+default, override with `ACP_CREDENTIALS`). `ci.yml` runs build and tests
+on `beta` pushes and pull requests.
 
 The first listing on each store is created manually through the dashboards
-(name, description, screenshots, privacy answers). Automation handles every
+(name, description, screenshots, privacy answers). The tool handles every
 version after that. Uploaded versions still go through each store's normal
 review before going live.
 
@@ -225,11 +224,10 @@ review before going live.
    an OAuth client and refresh token for the Chrome Web Store API.
 3. Create a Firefox Add-ons (AMO) account and generate API credentials (JWT
    issuer and secret).
-4. Add the credentials as GitHub repo secrets: `CWS_PUBLISHER_ID`,
-   `CWS_EXTENSION_ID`, `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`,
-   `CWS_REFRESH_TOKEN`, `AMO_JWT_ISSUER`, `AMO_JWT_SECRET`. (The AMO
-   add-on id is not a secret; the release workflow reads it out of the
-   Firefox manifest.)
+4. Put the credentials in the local credentials file for `just publish`,
+   a JSON object with `cws_publisher_id`, `cws_extension_id`,
+   `cws_client_id`, `cws_client_secret`, `cws_refresh_token`,
+   `amo_jwt_issuer`, `amo_jwt_secret`, `amo_addon_id`.
 
 ## Price history (wish list)
 
