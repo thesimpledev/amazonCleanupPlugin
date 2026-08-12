@@ -1,10 +1,16 @@
+/* Native form controls (checkboxes, selects, buttons) render dark when the
+   page declares a dark color scheme. */
+:root {
+  color-scheme: dark;
+}
+
 body {
   margin: 0;
   min-width: 280px;
   font-family: system-ui, sans-serif;
   font-size: 14px;
-  color: #1a1a1a;
-  background: #ffffff;
+  color: #e8e8e8;
+  background: #202124;
 }
 
 header {
@@ -12,7 +18,7 @@ header {
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #3a3a3a;
 }
 
 h1 {
@@ -26,6 +32,40 @@ h1 {
   gap: 6px;
 }
 
+#status {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #9aa0a6;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+#tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 12px 0;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+/* display: flex would otherwise override the hidden attribute. */
+#tabs[hidden] {
+  display: none;
+}
+
+.tab {
+  border: none;
+  background: none;
+  padding: 6px 10px;
+  font: inherit;
+  cursor: pointer;
+  color: #9aa0a6;
+  border-bottom: 2px solid transparent;
+}
+
+.tab.active {
+  color: #e8e8e8;
+  border-bottom-color: #e8e8e8;
+}
+
 main {
   padding: 4px 12px 8px;
 }
@@ -35,7 +75,7 @@ section h2 {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #6b6b6b;
+  color: #9aa0a6;
 }
 
 section label {
@@ -45,8 +85,42 @@ section label {
   padding: 3px 0;
 }
 
+.rule {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.rule span {
+  flex: 1;
+}
+
+.edit-schedule {
+  display: block;
+  margin: 8px 0 4px;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  color: #8ab4f8;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#quickhide {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid #3a3a3a;
+}
+
+#quickhide select {
+  flex: 1;
+}
+
 footer {
   padding: 8px 12px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #3a3a3a;
   text-align: right;
 }

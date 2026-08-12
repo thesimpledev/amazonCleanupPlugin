@@ -58,10 +58,9 @@ what triggers the padding re-fix.
 ```
 LICENSE                       MIT
 justfile                      build | test | publish | clean
-tsconfig.json                 strict, ES2022, module "none", outDir build/
-go.mod                        module for cmd/publish
-cmd/publish/main.go           store upload tool, standard library only
+tsconfig.json                 strict, ES2022, outDir build/
 extension/
+  icons/icon-16.png icon-48.png icon-128.png
   manifest.chrome.json
   manifest.firefox.json
   rules/rules.css
@@ -80,7 +79,7 @@ src/
   popup/popup.ts
   options/options.ts
 test/
-  schedule.test.ts
+  schedule.test.js
   fixtures/
 .github/workflows/
   ci.yml
@@ -96,16 +95,19 @@ Chrome versions before 121 refuse to load a manifest containing
 
 `just build` runs `tsc`, assembles `dist/chrome/` and `dist/firefox/` (static
 files, compiled JS, the right manifest renamed to `manifest.json`), and zips
-both. Scripts are compiled as classic scripts (`module: "none"`) and loaded
-in dependency order: content scripts as an ordered file list in the manifest,
-popup and options as ordered `<script>` tags, background as an ordered
-`scripts` array on Firefox and `importScripts` inside the Chrome service
-worker.
+both. Source files use no import or export statements, so tsc treats them as
+classic scripts sharing one global scope regardless of the module setting
+(the config says `es2022` because TypeScript deprecated `module: "none"`).
+They load in dependency order: content scripts as an ordered file list in
+the manifest, popup and options as ordered `<script>` tags, background as an
+ordered `scripts` array on Firefox and `importScripts` inside the Chrome
+service worker.
 
 Permissions are `storage` and `alarms`. Chrome match patterns cannot wildcard
 a TLD, so `*://*.amazon.*/*` is invalid and every marketplace is listed
-explicitly in `marketplaces.ts`. amazon.com ships in `host_permissions`; the
-rest sit in `optional_host_permissions` and the options page requests them.
+explicitly in `marketplaces.ts`. Every marketplace ships in
+`host_permissions` and in the content script matches of both manifests, so
+all storefronts work from install with nothing to enable anywhere.
 
 Settings live in `storage.sync`, with all schedules under a single key
 (mindful of the 8KB per-item quota) and options page saves debounced (sync
@@ -174,7 +176,18 @@ minute alarm, and on a one-shot alarm set for the next computed transition.
 
 ## Popup
 
-Sliders grouped by category, collapsible. Master kill switch at the top that
+Tabbed, and only shipped rules render. Each rule carries a `shipped` flag in
+the catalogue; unshipped entries stay out of the popup entirely, so the UI
+never shows dead toggles for planned work. The first tab holds the shopping
+assistant and cart together and keeps them together permanently, since they
+are the main focus. Sponsored, navigation, and pressure each get a tab once
+a rule in the group ships. The tab bar stays hidden while only one tab has
+content. Every rule renders as a dropdown naming the area's fate, Hidden /
+Visible / Schedule (Hidden and Visible only where scheduling does not
+apply); the words map onto the stored on/off/scheduled states. Picking
+Schedule reveals an "Edit schedule" jump into the options page editor,
+because the real editor does not fit in a popup. Master kill switch at the
+top that
 disables everything without discarding settings. Quick hide button with its
 duration picker. A status line reading "Cart sidebar hidden until Dec 25
 (Christmas)". Schedule editing lives in the options page, which also does
@@ -185,20 +198,22 @@ JSON import and export.
 Two branches: `beta` is where work happens, `master` is what deploys. Merges
 only, never rebase. The repository is public on GitHub under an MIT license.
 
-One Go tool, `cmd/publish`, standard library only, uploads a built zip to
-both stores over their HTTP APIs: the Chrome Web Store API (OAuth refresh
-token flow, then upload and publish) and the Firefox AMO API (JWT-signed
-upload). It runs two ways:
+Store uploads use the publisher tool, a separate repo
+(`thesimpledev/extensionPublisher`, Go, standard library only). It uploads
+a built zip to both stores over their HTTP APIs: the Chrome Web Store v2
+API (OAuth refresh token flow, then upload and publish; v2 paths include
+the publisher id) and the Firefox AMO v5 API (HMAC-SHA256 JWT auth,
+upload, poll validation, create version).
 
-- GitHub Actions: `release.yml` fires on push to `master`, builds, tests,
-  and publishes to both stores using repo secrets. It publishes only when
-  the manifest version changed, so a docs-only merge does not attempt a
-  release. `ci.yml` runs build and tests on `beta` pushes and pull requests.
-- Locally: `just publish` runs the same tool with credentials from a file
-  outside the repo.
+Releases are local, not GitHub Actions: merge `beta` into `master`, bump
+the manifest version, then `just publish`, which runs the tool from a
+sibling checkout at `../extensionPublisher` with credentials from a file
+outside the repo (`~/.config/amazon-cleanup/credentials.json` by
+default, override with `ACP_CREDENTIALS`). `ci.yml` runs build and tests
+on `beta` pushes and pull requests.
 
 The first listing on each store is created manually through the dashboards
-(name, description, screenshots, privacy answers). Automation handles every
+(name, description, screenshots, privacy answers). The tool handles every
 version after that. Uploaded versions still go through each store's normal
 review before going live.
 
@@ -209,11 +224,10 @@ review before going live.
    an OAuth client and refresh token for the Chrome Web Store API.
 3. Create a Firefox Add-ons (AMO) account and generate API credentials (JWT
    issuer and secret).
-4. Add the credentials as GitHub repo secrets: `CWS_PUBLISHER_ID`,
-   `CWS_EXTENSION_ID`, `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`,
-   `CWS_REFRESH_TOKEN`, `AMO_JWT_ISSUER`, `AMO_JWT_SECRET`. (The AMO
-   add-on id is not a secret; the release workflow reads it out of the
-   Firefox manifest.)
+4. Put the credentials in the local credentials file for `just publish`,
+   a JSON object with `cws_publisher_id`, `cws_extension_id`,
+   `cws_client_id`, `cws_client_secret`, `cws_refresh_token`,
+   `amo_jwt_issuer`, `amo_jwt_secret`, `amo_addon_id`.
 
 ## Price history (wish list)
 
@@ -264,34 +278,40 @@ structure a rule targets, with placeholder ASINs like `B0EXAMPLE01`. No saved
 Amazon pages.
 
 `schedule.ts` and `settings.ts` are pure and get `node:test` coverage with no
-framework dependency, run with `TZ` pinned. Selectors run against the
-fixtures.
+framework dependency, run with `TZ` pinned. The test files are plain JS
+(`test/schedule.test.js`) that `require` the compiled output in `build/`:
+Node isolates required files, so the libs publish their pure functions on
+`globalThis` (`acpScheduleLib`, `acpSettingsLib`), which is harmless in the
+browser. Selectors run against the fixtures.
 
-`cmd/publish` gets `go test` against `httptest` servers with synthetic
-responses. Gates: `go fmt`, `go vet`, `staticcheck`, `errcheck`, `revive`,
-`go test ./... -race -vet=all -shuffle=on -count=1`, `goaudit`. Dependencies
-vendored if any appear (none expected).
+The publish tool and its tests live in the `thesimpledev/extensionPublisher`
+repo, along with its Go gates and goaudit baseline.
 
 ## Order of work
 
-**0. Skeleton and automation.** Git repo with `master` and `beta`, MIT
+**0. Skeleton and automation. Done, merged to `master` 2026-08-03.** Git
+repo with `master` and `beta`, MIT
 license, both manifests, the justfile build producing both zips, tsconfig and
 the ambient types, the settings library and defaults, the rule catalogue
 loader and CSS gating, `boot.ts`, `observe.ts`, `layout.ts`, the popup and
-options shells, `cmd/publish`, and both GitHub Actions workflows. Rules are
+options shells, the publish tool (since moved to its own repo), and both GitHub
+Actions workflows. Rules are
 stubbed, so it loads clean in Chrome and Firefox and changes nothing on the
 page yet. The user works through the store account checklist in parallel.
 
 **1. Parity, then ship.** `alexa-shopping` and `cart-sidebar` with layout
-repair, plus the scheduling that makes the cart worth having: `schedule.ts`,
-the options page schedule editor, alarms, and quick hide. Then the first
+repair, plus the rest of the cart group (`cart-count`, `recently-viewed`,
+`buy-again`, `recommendations`), since those carousels leak gifts exactly
+the way the cart does, plus the scheduling that makes the cart worth
+having: `schedule.ts`, the options page schedule editor, alarms, and quick
+hide. Then the first
 listed submission to the Chrome Web Store and Firefox AMO, so the extension
 is installable from the stores. The two current extensions come off once it
 is live.
 
 **2. Everything else.** The remaining rules: sponsored detection, site
-stripe, navigation, pressure and upsell, the gift-leakage carousels, and gift
-mode. Shipped as store updates through the automation.
+stripe, navigation, pressure and upsell, and gift mode. Shipped as store
+updates through the automation.
 
 **3. Price history (wish list).** Separate version and a fresh review on both
 stores, since it adds a privacy policy and a data disclosure the earlier
@@ -301,3 +321,30 @@ notifications, fuller history view, export.
 Selectors get read off live pages in the phase that needs them, phase 1 for
 the assistant and cart and phase 2 for the rest, rather than written from
 memory. Amazon's class names differ per marketplace and change over time.
+
+## Status (2026-08-03)
+
+Phase 0 is complete and merged to `master`. All gates pass (`tsc` strict,
+6 node tests, `gofmt`, `go vet`, `staticcheck`, `errcheck`, `revive`,
+`go test -race -shuffle=on`) and goaudit reports zero findings: the five
+gosec hits inherent to a publish tool (variable URLs and file paths, a URL
+constant with "token" in its name) are suppressed at the site with reasons,
+and the capslock capability baseline is committed.
+
+Loading the skeleton for a look: `chrome://extensions`, Developer mode,
+"Load unpacked", `dist/chrome/`; Firefox `about:debugging#/runtime/this-firefox`,
+"Load Temporary Add-on", `dist/firefox/manifest.json`. Run `just build`
+first if `dist/` is missing. It should change nothing on any Amazon page
+yet; every selector list is empty by design.
+
+Open before phase 1 ships:
+
+- User checklist above: GitHub repo and remote, both store accounts, the
+  seven repo secrets.
+- The publish tool matches the current docs for both store APIs but has only
+  ever spoken to synthetic httptest servers; the first real publish is part
+  of phase 1's work, not a solved problem.
+
+Phase 1 starts with reading live selectors for `alexa-shopping` and
+`cart-sidebar`, then the real `schedule.ts` (year-boundary tests included),
+quick hide, the popup status line, and the first store submissions.

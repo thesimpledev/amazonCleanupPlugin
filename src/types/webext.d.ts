@@ -17,10 +17,16 @@ interface AcpStorageArea {
   remove(keys: string | string[]): Promise<void>;
 }
 
+interface AcpSessionStorageArea extends AcpStorageArea {
+  /* The session area defaults to trusted contexts only; the background
+     grants content scripts access with this. */
+  setAccessLevel(details: { accessLevel: string }): Promise<void>;
+}
+
 interface AcpStorage {
   sync: AcpStorageArea;
   local: AcpStorageArea;
-  session: AcpStorageArea;
+  session: AcpSessionStorageArea;
   onChanged: {
     addListener(
       callback: (

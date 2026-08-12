@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Amazon Cleanup",
-  "version": "0.1.0",
-  "description": "Hides Amazon clutter: the shopping assistant, cart sidebar, sponsored content, and pressure banners. Every cleanup is a toggle.",
+  "name": "Cleanup for Amazon",
+  "version": "1.0.0",
+  "description": "Hides Amazon clutter you choose: the shopping assistant, cart sidebar, and recommendations, with schedules for gift season.",
   "browser_specific_settings": {
     "gecko": {
       "id": "amazon-cleanup@thesimpledev",
@@ -12,9 +12,14 @@
       }
     }
   },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "permissions": ["storage", "alarms"],
-  "host_permissions": ["*://*.amazon.com/*"],
-  "optional_host_permissions": [
+  "host_permissions": [
+    "*://*.amazon.com/*",
     "*://*.amazon.ca/*",
     "*://*.amazon.com.mx/*",
     "*://*.amazon.com.br/*",
@@ -47,7 +52,30 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.amazon.com/*"],
+      "matches": [
+        "*://*.amazon.com/*",
+        "*://*.amazon.ca/*",
+        "*://*.amazon.com.mx/*",
+        "*://*.amazon.com.br/*",
+        "*://*.amazon.co.uk/*",
+        "*://*.amazon.ie/*",
+        "*://*.amazon.de/*",
+        "*://*.amazon.fr/*",
+        "*://*.amazon.it/*",
+        "*://*.amazon.es/*",
+        "*://*.amazon.nl/*",
+        "*://*.amazon.se/*",
+        "*://*.amazon.pl/*",
+        "*://*.amazon.com.be/*",
+        "*://*.amazon.com.tr/*",
+        "*://*.amazon.sa/*",
+        "*://*.amazon.ae/*",
+        "*://*.amazon.eg/*",
+        "*://*.amazon.in/*",
+        "*://*.amazon.co.jp/*",
+        "*://*.amazon.sg/*",
+        "*://*.amazon.com.au/*"
+      ],
       "run_at": "document_start",
       "css": ["rules/rules.css"],
       "js": [
@@ -62,7 +90,12 @@
   ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Amazon Cleanup"
+    "default_title": "Cleanup for Amazon",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
   },
   "options_ui": {
     "page": "options/options.html",
