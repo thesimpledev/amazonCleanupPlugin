@@ -21,7 +21,7 @@ to turn anything on or off.
 
 | Area | What goes away |
 |---|---|
-| Shopping assistant | The Rufus chat panel, its nav button, and the product page assistant summary |
+| Shopping assistant | The Amazon Alexa (Formerly Rufus) shopping assistant: the chat panel, its nav button, and the product page assistant summary |
 | Cart sidebar | The cart flyout docked to the right edge of every page |
 | Cart count | The item count badge on the cart icon |
 | Recently viewed | Your browsing history strip and its nav entry |
