@@ -84,6 +84,20 @@ runs the TypeScript build and the Node test suite (no test framework,
 cross the year boundary and wrap past midnight, and keep the rule
 catalogue, the CSS, and the test fixtures in step.
 
+## Release
+
+`just build` leaves three files in `dist/`, and a store release needs
+all of them:
+
+- `chrome.zip`: upload to the Chrome Web Store
+- `firefox.zip`: upload to Firefox Add-ons
+- `source.zip`: upload to Firefox Add-ons alongside `firefox.zip`.
+  AMO requires the source that reproduces the compiled JS; this is the
+  tracked repo at `HEAD`, so commit before building.
+
+Bump `version` in both `extension/manifest.*.json` first; the stores
+reject an upload that reuses a published version number.
+
 ## License
 
 MIT

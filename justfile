@@ -1,6 +1,8 @@
 # Amazon Cleanup Plugin
 #
-# build    compile TypeScript and produce dist/chrome.zip and dist/firefox.zip
+# build    compile TypeScript and produce dist/chrome.zip, dist/firefox.zip,
+#          and dist/source.zip (Firefox Add-ons requires the source that
+#          reproduces the compiled JS with every upload)
 # test     node tests (against compiled output) plus the Go gate chain
 # publish  upload both zips to the stores (credentials file outside the repo)
 # clean    remove build/ and dist/
@@ -15,6 +17,13 @@ build: clean
     just assemble firefox
     cd dist/chrome && zip -qr ../chrome.zip .
     cd dist/firefox && zip -qr ../firefox.zip .
+    just source
+
+# Source archive for the Firefox Add-ons review: every tracked file in the
+# repo, nothing from build/ or dist/. Reviewers run `just build` on it.
+source:
+    mkdir -p dist
+    git archive --format=zip -o dist/source.zip HEAD
 
 # Copy compiled JS and static files into dist/<target> with its manifest.
 assemble target:
