@@ -7,7 +7,11 @@
  * Every rule uses display: none !important, because Amazon sets inline
  * styles in places and a specificity fight is otherwise guaranteed. The
  * body padding resets also carry !important for the same reason: Amazon
- * reserves panel room with inline padding on body.
+ * reserves panel room with inline padding on body. Those resets also carry
+ * a :not(#acp-specificity) bump: in Amazon's docked-left assistant layout
+ * the padding comes from a stylesheet rule that is itself !important and
+ * more specific than "html.class body", and the bump adds an id's weight
+ * so the reset wins on every layout.
  *
  * :has() selectors sit in their own blocks: an unsupported selector
  * invalidates its whole selector list, and the plain fallbacks must
@@ -26,8 +30,12 @@ html.acp-alexa-shopping #rufus-dsk-container-overlay {
   display: none !important;
 }
 
-/* The docked panel reserves room with inline padding-left on body. */
-html.acp-alexa-shopping body {
+/* The docked panel reserves room with padding-left on body: inline in one
+   layout, and in the docked-left layout (seen 2026-08-21) from
+   "html.nav-ewc-persistent-hover body.rufus-docked-adjustable.rufus-docked-left
+   { padding-left: ... !important }", which outranks a plain "html.class body"
+   reset. Hence the specificity bump. */
+html.acp-alexa-shopping body:not(#acp-specificity) {
   padding-left: 0 !important;
 }
 
@@ -37,8 +45,10 @@ html.acp-cart-sidebar #ewc-content {
   display: none !important;
 }
 
-/* The sidebar reserves room with inline padding-right on body. */
-html.acp-cart-sidebar body {
+/* The sidebar reserves room with padding-right on body; the docked-left
+   assistant layout also sets it from an !important stylesheet rule, so the
+   same specificity bump applies. */
+html.acp-cart-sidebar body:not(#acp-specificity) {
   padding-right: 0 !important;
 }
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Cleanup for Amazon",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Hides Amazon clutter you choose: the shopping assistant, cart sidebar, and recommendations, with schedules for gift season.",
   "browser_specific_settings": {
     "gecko": {
