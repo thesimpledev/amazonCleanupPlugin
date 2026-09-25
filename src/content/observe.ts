@@ -28,6 +28,13 @@ function acpAttachObserver(): void {
     attributes: true,
     attributeFilter: ["style"],
   });
+  /* The docked assistant layout arrives as classes on body itself, which
+     the subtree observer's style filter does not see. */
+  const bodyClassObserver = new MutationObserver(acpDebouncedMutations);
+  bodyClassObserver.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
   acpOnMutations();
 }
 

@@ -39,6 +39,37 @@ html.acp-alexa-shopping body:not(#acp-specificity) {
   padding-left: 0 !important;
 }
 
+/* The docked layouts (seen 2026-09-24) also pad body top by 12px, paint
+   12px strips along the top and right edges with body::before and
+   body::after, and start the search dropdown backdrop (#nav-cover) and
+   the sticky subnav at the panel's edge. With the panel hidden, the
+   backdrop left a bright column where the panel would sit. */
+html.acp-alexa-shopping body.rufus-docked-left:not(#acp-specificity),
+html.acp-alexa-shopping body.rufus-docked-right:not(#acp-specificity) {
+  padding-top: 0 !important;
+}
+
+html.acp-alexa-shopping body.rufus-docked-left::before,
+html.acp-alexa-shopping body.rufus-docked-left::after,
+html.acp-alexa-shopping body.rufus-docked-right::before,
+html.acp-alexa-shopping body.rufus-docked-right::after {
+  display: none !important;
+}
+
+/* No !important on these two: Amazon's Prime Day rule moves #nav-cover up
+   by 30px and has to keep winning. Specificity alone outranks the docked
+   offsets ("body.class #id" and "body.class #id.class #id"). */
+html.acp-alexa-shopping body.rufus-docked-left #nav-cover,
+html.acp-alexa-shopping body.rufus-docked-right #nav-cover {
+  top: 0;
+  left: 0;
+}
+
+html.acp-alexa-shopping body.rufus-docked-left #navbar.subnav-sticky #nav-subnav,
+html.acp-alexa-shopping body.rufus-docked-right #navbar.subnav-sticky #nav-subnav {
+  left: 0;
+}
+
 /* cart-sidebar: the persistent cart flyout on the right edge. */
 html.acp-cart-sidebar #nav-flyout-ewc,
 html.acp-cart-sidebar #ewc-content {
